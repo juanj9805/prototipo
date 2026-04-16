@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactuar – Portal de Pagos (Prototipo)</title>
+    <style>
+      /* ───── Reset & base ───── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #0d2240;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+      }
+
+      /* ───── Card ───── */
+      .card {
+        background: #fff;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 480px;
+        padding: 36px 32px 32px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+        position: relative;
+      }
+
+      /* ───── Logo ───── */
+      .logo-wrap {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+      .logo {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0d2240;
+        letter-spacing: -0.5px;
+      }
+      .logo span {
+        color: #ff5c35;
+      }
+
+      /* ───── Step indicator ───── */
+      .step-bar {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 24px;
+        justify-content: center;
+      }
+      .step-dot {
+        width: 28px;
+        height: 5px;
+        border-radius: 3px;
+        background: #dde3ec;
+        transition: background 0.3s;
+      }
+      .step-dot.active {
+        background: #ff5c35;
+      }
+      .step-dot.done {
+        background: #0d2240;
+      }
+
+      /* ───── Headings ───── */
+      h2 {
+        font-size: 17px;
+        color: #0d2240;
+        margin-bottom: 6px;
+      }
+      .subtitle {
+        font-size: 13px;
+        color: #6b7a8d;
+        margin-bottom: 22px;
+        line-height: 1.5;
+      }
+
+      /* ───── Form elements ───── */
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #3a4a5c;
+        margin-bottom: 5px;
+      }
+      .required {
+        color: #ff5c35;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="tel"],
+      input[type="number"],
+      select {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid #d1d9e6;
+        border-radius: 7px;
+        font-size: 14px;
+        color: #1a2b3c;
+        background: #fff;
+        outline: none;
+        transition: border-color 0.2s;
+        appearance: none;
+      }
+      input:focus,
+      select:focus {
+        border-color: #ff5c35;
+      }
+      select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a8d' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 36px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      /* ───── Info rows ───── */
+      .info-row {
+        background: #f5f7fb;
+        border-radius: 7px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+      }
+      .info-row .lbl {
+        font-size: 12px;
+        color: #6b7a8d;
+        margin-bottom: 2px;
+      }
+      .info-row .val {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0d2240;
+      }
+      .info-row .val.money {
+        color: #1a7a40;
+        font-size: 16px;
+      }
+      .info-row .val.warn {
+        color: #d4550a;
+      }
+
+      /* ───── Buttons ───── */
+      .btn-primary {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        background: #ff5c35;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        margin-top: 6px;
+        transition:
+          background 0.2s,
+          transform 0.1s;
+      }
+      .btn-primary:hover {
+        background: #e04a26;
+      }
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+
+      .btn-secondary {
+        display: block;
+        width: 100%;
+        padding: 11px;
+        background: transparent;
+        color: #0d2240;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1.5px solid #d1d9e6;
+        border-radius: 7px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: border-color 0.2s;
+      }
+      .btn-secondary:hover {
+        border-color: #0d2240;
+      }
+
+      .link-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #ff5c35;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: underline;
+        padding: 0;
+        display: inline-block;
+        margin-top: 12px;
+      }
+      .link-btn:hover {
+        color: #c43d1e;
+      }
+
+      /* ───── OTP ───── */
+      .otp-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 18px 0;
+      }
+      .otp-group input {
+        width: 52px;
+        height: 56px;
+        text-align: center;
+        font-size: 22px;
+        font-weight: 700;
+        border: 2px solid #d1d9e6;
+        border-radius: 8px;
+        padding: 0;
+      }
+      .otp-group input:focus {
+        border-color: #ff5c35;
+      }
+
+      /* ───── Alerts ───── */
+      .alert {
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 18px;
+      }
+      .alert-info {
+        background: #e8f4fd;
+        color: #1565a8;
+        border-left: 4px solid #1a7fd4;
+      }
+      .alert-success {
+        background: #eaf7f0;
+        color: #1a6b3c;
+        border-left: 4px solid #28a864;
+      }
+      .alert-error {
+        background: #fdecea;
+        color: #b71c1c;
+        border-left: 4px solid #e53935;
+      }
+
+      /* ───── Credit list ───── */
+      .credit-item {
+        border: 1.5px solid #d1d9e6;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .credit-item:hover {
+        border-color: #ff5c35;
+        background: #fff6f4;
+      }
+      .ci-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ff5c35;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .ci-info {
+        flex: 1;
+      }
+      .ci-code {
+        font-size: 13px;
+        color: #6b7a8d;
+      }
+      .ci-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0d2240;
+      }
+      .ci-amount {
+        font-size: 13px;
+        color: #1a7a40;
+        font-weight: 600;
+      }
+      .ci-arrow {
+        color: #9aacbc;
+        font-size: 18px;
+      }
+
+      /* ───── PSE footer ───── */
+      .pse-footer {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 12px;
+        color: #9aacbc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .pse-badge {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f0f3f8;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: #0d2240;
+        font-size: 11px;
+      }
+
+      /* ───── Misc ───── */
+      .back-link {
+        font-size: 13px;
+        color: #6b7a8d;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 18px;
+        background: none;
+        border: none;
+        padding: 0;
+      }
+      .back-link:hover {
+        color: #0d2240;
+      }
+      .divider {
+        border: none;
+        border-top: 1px solid #e8ecf3;
+        margin: 18px 0;
+      }
+      .resend-row {
+        text-align: center;
+        font-size: 13px;
+        color: #6b7a8d;
+        margin-top: 10px;
+      }
+      .resend-row button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #ff5c35;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: underline;
+        padding: 0;
+      }
+
+      /* ───── Steps ───── */
+      .step {
+        display: none;
+      }
+      .step.active {
+        display: block;
+      }
+
+      /* ───── Top bar ───── */
+      .topbar {
+        width: 100%;
+        max-width: 480px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .topbar-back {
+        background: rgba(255, 255, 255, 0.12);
+        border: none;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 6px 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .topbar-back:hover {
+        background: rgba(255, 255, 255, 0.22);
+      }
+
+      /* ───── Tags ───── */
+      .tag {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .tag-active {
+        background: #eaf7f0;
+        color: #1a6b3c;
+      }
+      .tag-mora {
+        background: #fdecea;
+        color: #b71c1c;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <button class="topbar-back" onclick="goStep(1)">
+        ← Volver al sitio web de interactuar
+      </button>
+    </div>
+
+    <div class="card">
+      <!-- STEP 1: Ingresar código -->
+      <div class="step active" id="step-1">
+        <div class="logo-wrap"><div class="logo">·interactuar</div></div>
+        <h2>Ingrese el código de su crédito</h2>
+        <p class="subtitle">
+          Consulte y realice el pago de su obligación de forma rápida y segura.
+        </p>
+
+        <div class="form-group">
+          <input
+            type="text"
+            id="credit-code-input"
+            placeholder="Ej: 12345"
+            maxlength="20"
+            onkeydown="if (event.key === 'Enter') validateCode();"
+          />
+        </div>
+
+        <div
+          style="
+            border: 1px solid #d1d9e6;
+            border-radius: 6px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            background: #f9fafb;
+          "
+        >
+          <input
+            type="checkbox"
+            id="captcha-check"
+            style="width: 20px; height: 20px; cursor: pointer"
+            onchange="
+              window.captchaOk = true;
+              this.disabled = true;
+            "
+          />
+          <label
+            for="captcha-check"
+            style="font-size: 13px; color: #3a4a5c; margin: 0; cursor: pointer"
+            >No soy un robot</label
+          >
+          <div style="margin-left: auto; text-align: center">
+            <div style="font-size: 10px; color: #9aacbc; font-weight: 600">
+              reCAPTCHA
+            </div>
+            <div style="font-size: 9px; color: #b0bcc8">
+              Privacidad · Términos
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="validateCode()">VALIDAR</button>
+
+        <div style="text-align: center; margin-top: 16px">
+          <button class="link-btn" onclick="goStep(2)">
+            ¿Olvidé mi código de crédito?
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Identificación -->
+      <div class="step" id="step-2">
+        <div class="step-bar">
+          <div class="step-dot done"></div>
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+          <div class="step-dot"></div>
+        </div>
+        <button class="back-link" onclick="goStep(1)">← Volver</button>
+        <div class="logo-wrap"><div class="logo">·interactuar</div></div>
+        <h2>Recuperar código de crédito</h2>
+        <p class="subtitle">
+          Ingrese su información para identificarle y enviar un código de
+          verificación al número registrado.
+        </p>
+
+        <div class="form-group">
+          <label>Tipo de documento <span class="required">*</span></label>
+          <select id="doc-type">
+            <option value="">Seleccionar</option>
+            <option value="CC">Cédula de Ciudadanía (CC)</option>
+            <option value="CE">Cédula de Extranjería (CE)</option>
+            <option value="TI">Tarjeta de Identidad (TI)</option>
+            <option value="PP">Pasaporte (PP)</option>
+            <option value="NIT">NIT</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Número de documento <span class="required">*</span></label>
+          <input
+            type="text"
+            id="doc-number"
+            placeholder="Ej: 1128271739"
+            maxlength="15"
+          />
+        </div>
+
+        <button class="btn-primary" onclick="sendOTP()">
+          ENVIAR CÓDIGO OTP
+        </button>
+        <button class="btn-secondary" onclick="goStep(1)">Cancelar</button>
+      </div>
+
+      <!-- STEP 3: OTP -->
+      <div class="step" id="step-3">
+        <div class="step-bar">
+          <div class="step-dot done"></div>
+          <div class="step-dot done"></div>
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+        </div>
+        <button class="back-link" onclick="goStep(2)">← Volver</button>
+        <div class="logo-wrap"><div class="logo">·interactuar</div></div>
+        <h2>Verificación de identidad</h2>
+
+        <div class="alert alert-info">
+          📱 Hemos enviado un código de 6 dígitos al celular registrado
+          <strong id="masked-phone"></strong>. Expira en
+          <span id="otp-timer">05:00</span>.
+        </div>
+
+        <p
+          style="
+            font-size: 13px;
+            color: #3a4a5c;
+            margin-bottom: 4px;
+            text-align: center;
+          "
+        >
+          Ingrese el código recibido
+        </p>
+
+        <div class="otp-group" id="otp-inputs">
+          <input
+            type="text"
+            maxlength="1"
+            oninput="otpNext(this, 0)"
+            onkeydown="otpBack(event, 0)"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            oninput="otpNext(this, 1)"
+            onkeydown="otpBack(event, 1)"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            oninput="otpNext(this, 2)"
+            onkeydown="otpBack(event, 2)"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            oninput="otpNext(this, 3)"
+            onkeydown="otpBack(event, 3)"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            oninput="otpNext(this, 4)"
+            onkeydown="otpBack(event, 4)"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            oninput="otpNext(this, 5)"
+            onkeydown="otpBack(event, 5)"
+          />
+        </div>
+
+        <div
+          id="otp-error"
+          class="alert alert-error"
+          style="display: none; margin-bottom: 0"
+        >
+          ❌ Código inválido. Verifique e intente nuevamente.
+        </div>
+
+        <button
+          class="btn-primary"
+          style="margin-top: 16px"
+          onclick="validateOTP()"
+        >
+          VERIFICAR CÓDIGO
+        </button>
+        <div class="resend-row">
+          ¿No recibió el código? <button onclick="resendOTP()">Reenviar</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Seleccionar crédito -->
+      <div class="step" id="step-4">
+        <div class="step-bar">
+          <div class="step-dot done"></div>
+          <div class="step-dot done"></div>
+          <div class="step-dot done"></div>
+          <div class="step-dot active"></div>
+        </div>
+        <div class="logo-wrap"><div class="logo">·interactuar</div></div>
+        <h2>Sus créditos activos</h2>
+        <p class="subtitle">
+          Encontramos <strong>2 créditos</strong> asociados a su identificación.
+          Seleccione el que desea gestionar.
+        </p>
+
+        <div class="credit-item" onclick="selectCredit(0)">
+          <div class="ci-icon">C</div>
+          <div class="ci-info">
+            <div class="ci-code">
+              Código: <strong>12345</strong> ·
+              <span class="tag tag-active">Al día</span>
+            </div>
+            <div class="ci-name">Adriana Patricia Tascón</div>
+            <div class="ci-amount">Saldo: $ 16.978.450</div>
+          </div>
+          <div class="ci-arrow">›</div>
+        </div>
+
+        <div class="credit-item" onclick="selectCredit(1)">
+          <div class="ci-icon">C</div>
+          <div class="ci-info">
+            <div class="ci-code">
+              Código: <strong>67890</strong> ·
+              <span class="tag tag-mora">En mora</span>
+            </div>
+            <div class="ci-name">Adriana Patricia Tascón</div>
+            <div class="ci-amount">Saldo: $ 4.320.000</div>
+          </div>
+          <div class="ci-arrow">›</div>
+        </div>
+
+        <button class="btn-secondary" onclick="goStep(1)">Cancelar</button>
+      </div>
+
+      <!-- STEP 5: Detalle + pago -->
+      <div class="step" id="step-5">
+        <div class="logo-wrap"><div class="logo">·interactuar</div></div>
+
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+          "
+        >
+          <h2 style="margin: 0">Detalle del crédito</h2>
+          <span class="tag tag-active" id="credit-status-tag">Al día</span>
+        </div>
+
+        <div class="info-row">
+          <div class="lbl">Código crédito</div>
+          <div class="val" id="d-code">12345</div>
+        </div>
+        <div class="info-row">
+          <div class="lbl">Nombre o razón social del pagador</div>
+          <div class="val">ADRIANA PATRICIA TASCÓN TIRADO</div>
+        </div>
+        <div class="info-row">
+          <div class="lbl">Número de identificación</div>
+          <div class="val">1128271739</div>
+        </div>
+        <div class="info-row">
+          <div class="lbl">Tipo de documento</div>
+          <div class="val">Cédula de Ciudadanía (CC)</div>
+        </div>
+        <div class="info-row">
+          <div class="lbl">Valor cancelación total crédito</div>
+          <div class="val money" id="d-total">$ 16.978.450</div>
+        </div>
+        <div class="info-row" style="border: 1.5px solid #c8e6c9">
+          <div class="lbl">💳 Valor de cuota mensual</div>
+          <div class="val money" id="d-cuota">$ 487.500</div>
+        </div>
+        <div class="info-row" style="border: 1.5px solid #ffe0b2">
+          <div class="lbl">⚠️ Valor pago mínimo</div>
+          <div class="val warn" id="d-minimo">$ 243.750</div>
+        </div>
+
+        <hr class="divider" />
+        <h2 style="margin-bottom: 14px">Realizar pago</h2>
+
+        <div class="form-group">
+          <label>Correo electrónico <span class="required">*</span></label>
+          <input type="email" placeholder="correo@ejemplo.com" />
+        </div>
+        <div class="form-group">
+          <label>Número telefónico <span class="required">*</span></label>
+          <input type="tel" placeholder="300 000 0000" />
+        </div>
+        <div class="form-group">
+          <label>Valor a pagar <span class="required">*</span></label>
+          <input
+            type="text"
+            id="pay-amount"
+            placeholder="$ 0"
+            oninput="formatMoney(this)"
+          />
+          <div
+            id="pay-hint"
+            style="font-size: 11px; color: #9aacbc; margin-top: 4px"
+          >
+            Mínimo: $ 243.750 · Total: $ 16.978.450
+          </div>
+        </div>
+
+        <div
+          style="display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap"
+        >
+          <button
+            onclick="setAmount(0)"
+            style="
+              flex: 1;
+              padding: 7px;
+              border: 1.5px solid #d1d9e6;
+              border-radius: 6px;
+              background: #f5f7fb;
+              font-size: 12px;
+              cursor: pointer;
+              font-weight: 600;
+            "
+          >
+            Pago mínimo
+          </button>
+          <button
+            onclick="setAmount(1)"
+            style="
+              flex: 1;
+              padding: 7px;
+              border: 1.5px solid #d1d9e6;
+              border-radius: 6px;
+              background: #f5f7fb;
+              font-size: 12px;
+              cursor: pointer;
+              font-weight: 600;
+            "
+          >
+            Cuota mensual
+          </button>
+          <button
+            onclick="setAmount(2)"
+            style="
+              flex: 1;
+              padding: 7px;
+              border: 1.5px solid #d1d9e6;
+              border-radius: 6px;
+              background: #f5f7fb;
+              font-size: 12px;
+              cursor: pointer;
+              font-weight: 600;
+            "
+          >
+            Total crédito
+          </button>
+        </div>
+
+        <button class="btn-primary" onclick="confirmPayment()">
+          PAGAR AHORA
+        </button>
+        <button class="btn-secondary" onclick="goStep(1)">Cancelar</button>
+      </div>
+
+      <!-- STEP 6: Confirmación -->
+      <div class="step" id="step-6">
+        <div class="logo-wrap"><div class="logo">·interactuar</div></div>
+        <div class="alert alert-success" style="margin-top: 10px">
+          ✅ <strong>¡Pago en proceso!</strong><br />
+          Ha sido redirigido a la pasarela PSE. Recibirá confirmación en su
+          correo.
+        </div>
+        <div class="info-row">
+          <div class="lbl">Código crédito</div>
+          <div class="val" id="confirm-code">12345</div>
+        </div>
+        <div class="info-row">
+          <div class="lbl">Valor a pagar</div>
+          <div class="val money" id="confirm-amount">$ 487.500</div>
+        </div>
+        <div class="info-row">
+          <div class="lbl">Estado</div>
+          <div class="val" style="color: #1a7a40">Procesando vía PSE...</div>
+        </div>
+        <button
+          class="btn-secondary"
+          onclick="goStep(1)"
+          style="margin-top: 8px"
+        >
+          Volver al inicio
+        </button>
+      </div>
+
+      <div class="pse-footer">
+        <span>Pago realizado a través de</span>
+        <span style="font-weight: 700; color: #0d2240">PSE</span>
+        <div class="pse-badge">PSE</div>
+      </div>
+    </div>
+
+    <div
+      style="
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 8px;
+        padding: 14px 18px;
+        max-width: 480px;
+        width: 100%;
+        margin-top: 12px;
+        font-size: 12px;
+        color: #c8d8e8;
+        line-height: 1.7;
+      "
+    >
+      <strong style="color: #fff">🧪 Guía del prototipo</strong><br />
+      • <strong>Códigos válidos:</strong>
+      <code style="background: #ffffff22; padding: 1px 5px; border-radius: 3px"
+        >12345</code
+      >
+      o
+      <code style="background: #ffffff22; padding: 1px 5px; border-radius: 3px"
+        >67890</code
+      ><br />
+      • <strong>Flujo "Olvidé mi código":</strong> cualquier doc + OTP
+      <code style="background: #ffffff22; padding: 1px 5px; border-radius: 3px"
+        >123456</code
+      ><br />
+      • ✨ Campos nuevos: <em>Valor de cuota</em> y <em>Pago mínimo</em>
+    </div>
+
+    <script>
+      // ── Datos mock ──
+      var credits = [
+        {
+          code: "12345",
+          total: "16.978.450",
+          cuota: "487.500",
+          minimo: "243.750",
+          status: "Al día",
+          tag: "active",
+        },
+        {
+          code: "67890",
+          total: "4.320.000",
+          cuota: "310.000",
+          minimo: "155.000",
+          status: "En mora",
+          tag: "mora",
+        },
+      ];
+      var current = credits[0];
+      var timerInterval = null;
+      var OTP = "123456";
+
+      // Captcha flag en window para que sea accesible desde atributos inline
+      window.captchaOk = false;
+
+      // ── Navegación ──
+      function goStep(n) {
+        document.querySelectorAll(".step").forEach(function (s) {
+          s.classList.remove("active");
+        });
+        document.getElementById("step-" + n).classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // ── Step 1: validar código ──
+      function validateCode() {
+        var code = document.getElementById("credit-code-input").value.trim();
+        if (!window.captchaOk) {
+          alert("Por favor confirme que no es un robot.");
+          return;
+        }
+        if (!code) {
+          alert("Por favor ingrese su código de crédito.");
+          return;
+        }
+        var found = null;
+        for (var i = 0; i < credits.length; i++) {
+          if (credits[i].code === code) {
+            found = credits[i];
+            break;
+          }
+        }
+        if (found) {
+          current = found;
+          loadDetail();
+          goStep(5);
+        } else {
+          alert("⚠️ Código no encontrado. Códigos de prueba: 12345 o 67890");
+        }
+      }
+
+      // ── Step 2: enviar OTP ──
+      function sendOTP() {
+        var docType = document.getElementById("doc-type").value;
+        var docNum = document.getElementById("doc-number").value.trim();
+        if (!docType) {
+          alert("Seleccione el tipo de documento.");
+          return;
+        }
+        if (!docNum) {
+          alert("Ingrese el número de documento.");
+          return;
+        }
+        document.getElementById("masked-phone").textContent = " ****** 9 39";
+        goStep(3);
+        startTimer(300);
+      }
+
+      // ── Temporizador OTP ──
+      function startTimer(secs) {
+        clearInterval(timerInterval);
+        var rem = secs;
+        var el = document.getElementById("otp-timer");
+        function tick() {
+          var m = String(Math.floor(rem / 60)).padStart(2, "0");
+          var s = String(rem % 60).padStart(2, "0");
+          el.textContent = m + ":" + s;
+          if (rem <= 0) {
+            clearInterval(timerInterval);
+          }
+          rem--;
+        }
+        tick();
+        timerInterval = setInterval(tick, 1000);
+      }
+
+      // ── Navegación entre celdas OTP ──
+      function otpNext(input, idx) {
+        input.value = input.value.replace(/\D/g, "");
+        var inputs = document.querySelectorAll("#otp-inputs input");
+        if (input.value && idx < 5) inputs[idx + 1].focus();
+      }
+      function otpBack(e, idx) {
+        var inputs = document.querySelectorAll("#otp-inputs input");
+        if (e.key === "Backspace" && !inputs[idx].value && idx > 0)
+          inputs[idx - 1].focus();
+      }
+
+      // ── Step 3: validar OTP ──
+      function validateOTP() {
+        var inputs = document.querySelectorAll("#otp-inputs input");
+        var entered = "";
+        inputs.forEach(function (i) {
+          entered += i.value;
+        });
+        document.getElementById("otp-error").style.display = "none";
+        if (entered.length < 6) {
+          alert("Ingrese los 6 dígitos del código.");
+          return;
+        }
+        if (entered === OTP) {
+          goStep(4);
+        } else {
+          document.getElementById("otp-error").style.display = "block";
+          inputs.forEach(function (i) {
+            i.value = "";
+            i.style.borderColor = "#e53935";
+          });
+          inputs[0].focus();
+          setTimeout(function () {
+            inputs.forEach(function (i) {
+              i.style.borderColor = "";
+            });
+          }, 2000);
+        }
+      }
+
+      // ── Reenviar OTP ──
+      function resendOTP() {
+        document.getElementById("otp-error").style.display = "none";
+        document.querySelectorAll("#otp-inputs input").forEach(function (i) {
+          i.value = "";
+        });
+        document.querySelectorAll("#otp-inputs input")[0].focus();
+        startTimer(300);
+        alert("✅ Nuevo código enviado. En este demo use: 123456");
+      }
+
+      // ── Step 4: seleccionar crédito ──
+      function selectCredit(idx) {
+        current = credits[idx];
+        loadDetail();
+        goStep(5);
+      }
+
+      // ── Cargar detalle en step 5 ──
+      function loadDetail() {
+        document.getElementById("d-code").textContent = current.code;
+        document.getElementById("d-total").textContent = "$ " + current.total;
+        document.getElementById("d-cuota").textContent = "$ " + current.cuota;
+        document.getElementById("d-minimo").textContent = "$ " + current.minimo;
+        var tag = document.getElementById("credit-status-tag");
+        tag.textContent = current.status;
+        tag.className =
+          "tag " + (current.tag === "mora" ? "tag-mora" : "tag-active");
+        document.getElementById("pay-hint").textContent =
+          "Mínimo: $ " + current.minimo + " · Total: $ " + current.total;
+      }
+
+      // ── Botones de monto rápido ──
+      function setAmount(type) {
+        var val =
+          type === 0
+            ? current.minimo
+            : type === 1
+              ? current.cuota
+              : current.total;
+        document.getElementById("pay-amount").value = "$ " + val;
+      }
+
+      // ── Formatear dinero ──
+      function formatMoney(input) {
+        var v = input.value.replace(/[^0-9]/g, "");
+        if (!v) {
+          input.value = "";
+          return;
+        }
+        input.value = "$ " + parseInt(v, 10).toLocaleString("es-CO");
+      }
+
+      // ── Confirmar pago ──
+      function confirmPayment() {
+        var amount = document.getElementById("pay-amount").value;
+        if (!amount) {
+          alert("Ingrese el valor a pagar.");
+          return;
+        }
+        document.getElementById("confirm-amount").textContent = amount;
+        document.getElementById("confirm-code").textContent = current.code;
+        goStep(6);
+      }
+    </script>
+  </body>
+</html>
